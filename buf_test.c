@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+
+pthread_mutex_t RW_lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct ssd{//ssd data
     int age;
@@ -63,9 +66,15 @@ struct buf_val buf_read(uint64_t lpn_t){//버퍼 read 함수
 
 void main(){
     struct ssd aaa = {3, "차상민"};//ssd data
-    struct buf_val bbb = {24, &aaa}; //lpn + ssd data 구조체
+    struct buf_val bbb = {20, &aaa}; //lpn + ssd data 구조체
+
+    pthread_mutex_lock(&RW_lock); //write lock
     buf_write(&bbb);
-    
-    struct buf_val ccc = buf_read(24);
+    pthread_mutex_unlock(&RW_lock);
+
+    pthread_mutex_lock(&RW_lock);
+    struct buf_val ccc = buf_read(20); //read lock
+    pthread_mutex_unlock(&RW_lock);
     printf("%d\n",ccc.lpn);
 }
+
